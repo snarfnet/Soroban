@@ -1,0 +1,84 @@
+========================================
+App Store Metadata - Japanese Soroban
+========================================
+
+【App Name (EN)】Japanese Soroban
+【App Name (JA)】Japanese Soroban
+
+【Subtitle (EN)】Realistic Japanese Abacus
+【Subtitle (JA)】リアルなそろばんシミュレーター
+
+【Category】Education
+【Secondary】Utilities
+
+【Price】Free (with ads)
+
+【Age Rating】4+
+
+【Bundle ID】com.japanesesoroban.app
+
+========== ENGLISH ==========
+
+【Description】
+Experience the art of Japanese calculation with the most realistic soroban (abacus) simulator.
+
+Japanese Soroban brings a traditional 13-rod soroban to your iPhone with stunning realism:
+
+- REALISTIC PHYSICS
+  Tilt your device and watch beads respond to gravity, just like a real soroban. The gyroscope-powered physics make every interaction feel natural and satisfying.
+
+- AUTHENTIC SOUND
+  Every bead click is crafted to sound like real wooden beads striking the reckoning bar. The satisfying "click-clack" makes calculation a tactile pleasure.
+
+- BEAUTIFUL DESIGN
+  Warm wood tones, diamond-shaped beads, and traditional dot markers create an authentic soroban experience on your screen.
+
+- DIGITAL DISPLAY
+  A built-in calculator display shows the current value, perfect for learning and verification.
+
+- SIMPLE & INTUITIVE
+  Tap or slide beads to move them. No complicated menus or settings — just a beautiful, functional soroban.
+
+Whether you're a student learning abacus arithmetic, a soroban enthusiast, or simply curious about Japanese culture, this app delivers the most authentic digital soroban experience available.
+
+【Keywords (EN)】
+soroban,abacus,japanese,calculator,math,education,traditional,arithmetic,beads,counting
+
+【Promotional Text (EN)】
+The most realistic Japanese soroban simulator — with gyroscope gravity physics, authentic wood sounds, and beautiful design.
+
+========== JAPANESE ==========
+
+【Description】
+世界一リアルなそろばんシミュレーター。
+
+Japanese Sorobanは、本物のそろばんの質感を再現した13桁のそろばんアプリです。
+
+■ リアルな物理演算
+端末を傾けると珠が重力に従って動きます。ジャイロセンサーによるリアルな物理演算で、本物のそろばんのような操作感を実現。
+
+■ 本格的なサウンド
+木製の珠が梁に当たる「パチパチ」という音をリアルに再現。計算する楽しさが味わえます。
+
+■ 美しいデザイン
+温かみのある木目調、菱形の珠、伝統的な定位点を忠実に再現した本格的なデザイン。
+
+■ デジタル表示
+現在の値をリアルタイムで表示。学習や確認に便利です。
+
+■ シンプル操作
+珠をタップまたはスライドするだけ。複雑なメニューは一切ありません。
+
+そろばん学習者、珠算愛好家、日本文化に興味がある方、すべての方にお楽しみいただけます。
+
+【Keywords (JA)】
+そろばん,算盤,計算,珠算,暗算,教育,日本,伝統,電卓,数学
+
+【Promotional Text (JA)】
+ジャイロセンサーで重力を再現、木の珠の音も本格的。世界一リアルなそろばんアプリ。
+
+========== REVIEW NOTES ==========
+This app uses CoreMotion to read device motion data for simulating gravity effects on soroban beads. Motion data is processed locally and never transmitted. No account or login required.
+
+【Support URL】https://snarfnet.github.io/Soroban/support.html
+【Privacy Policy URL】https://snarfnet.github.io/Soroban/privacy.html
