@@ -355,10 +355,8 @@ class SorobanScene: SKScene {
             guard let self = self, let motion = motion else { return }
             // In landscape, gravity.x maps to the "vertical" axis of the soroban
             // gravity.y maps to horizontal tilt
-            let gx = motion.gravity.x
             let gy = motion.gravity.y
-
-            // For landscape right orientation, we use gy for vertical effect
+            // For landscape orientation, gy maps to vertical effect on beads
             self.gravityY = -gy
             self.applyGravity()
         }
