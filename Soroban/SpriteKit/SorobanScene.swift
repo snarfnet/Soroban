@@ -235,15 +235,15 @@ class SorobanScene: SKScene {
             let targetActive = deltaY > beadHeight * 0.3
             let targetInactive = deltaY < -beadHeight * 0.3
             if targetActive {
-                // Activate this bead and all above it (between this bead and beam)
-                for j in beadIdx..<earthBeadsPerRod {
+                // Activate this bead and all between it and beam (index 0 = closest to beam)
+                for j in stride(from: beadIdx, through: 0, by: -1) {
                     if !rod.earthActive[j] {
                         moveEarthBead(rod: rod, index: j, active: true)
                     }
                 }
             } else if targetInactive {
                 // Deactivate this bead and all below it (away from beam)
-                for j in stride(from: beadIdx, through: 0, by: -1) {
+                for j in beadIdx..<earthBeadsPerRod {
                     if rod.earthActive[j] {
                         moveEarthBead(rod: rod, index: j, active: false)
                     }
@@ -272,15 +272,15 @@ class SorobanScene: SKScene {
                 } else {
                     let beadIdx = bead.beadIndex
                     if rod.earthActive[beadIdx] {
-                        // Deactivate this and all below (away from beam)
-                        for j in stride(from: beadIdx, through: 0, by: -1) {
+                        // Deactivate this and all away from beam
+                        for j in beadIdx..<earthBeadsPerRod {
                             if rod.earthActive[j] {
                                 moveEarthBead(rod: rod, index: j, active: false)
                             }
                         }
                     } else {
-                        // Activate this and all above (toward beam)
-                        for j in beadIdx..<earthBeadsPerRod {
+                        // Activate this and all toward beam (index 0 = closest)
+                        for j in stride(from: beadIdx, through: 0, by: -1) {
                             if !rod.earthActive[j] {
                                 moveEarthBead(rod: rod, index: j, active: true)
                             }

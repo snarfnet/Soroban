@@ -60,13 +60,9 @@ struct ContentView: View {
 
             Spacer()
 
-            // Ad placeholder area
-            Text("AD")
-                .font(.caption2)
-                .foregroundStyle(Color(red: 0.3, green: 0.3, blue: 0.3))
-                .frame(width: 320, height: 40)
-                .background(Color(red: 0.1, green: 0.08, blue: 0.06))
-                .cornerRadius(4)
+            // AdMob Banner
+            BannerAdView(adUnitID: AdConfig.bannerAdUnitID)
+                .frame(width: 320, height: 50)
 
             Spacer()
 
