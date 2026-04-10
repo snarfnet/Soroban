@@ -5,7 +5,7 @@ import GoogleMobileAds
 @main
 struct SorobanApp: App {
     init() {
-        GADMobileAds.sharedInstance().start(completionHandler: nil)
+        MobileAds.shared.start()
     }
 
     var body: some Scene {
