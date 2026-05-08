@@ -54,6 +54,7 @@ targets:
     settings:
       base:
         TARGETED_DEVICE_FAMILY: "1"
+        PRODUCT_BUNDLE_IDENTIFIER: com.japanesesoroban.app
         INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
     dependencies:
       - package: GoogleMobileAds
