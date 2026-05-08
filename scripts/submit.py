@@ -197,8 +197,8 @@ for loc in locs.get('data', []):
             print(f'      Uploaded: {fname}')
 
 print('Screenshots uploaded! Waiting for processing...')
-for _ in range(20):
-    time.sleep(10)
+for _ in range(40):
+    time.sleep(30)
     all_done = True
     locs_check = api('GET', f'/appStoreVersions/{version_id}/appStoreVersionLocalizations')
     for loc_c in locs_check.get('data', []):
