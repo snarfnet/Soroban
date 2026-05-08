@@ -240,12 +240,28 @@ api('PATCH', f'/appStoreVersions/{version_id}', json={
 existing_reviews = requests.get(f'https://api.appstoreconnect.apple.com/v1/apps/{APP_ID}/reviewSubmissions',
                                 headers=headers())
 if existing_reviews.ok:
+    cancelled = False
     for er in existing_reviews.json().get('data', []):
         er_state = er['attributes'].get('state', '')
         if er_state in ('WAITING_FOR_REVIEW', 'IN_REVIEW', 'READY_FOR_REVIEW'):
-            print(f'  Cancelling existing review submission {er["id"]} ({er_state})')
-            requests.delete(f'https://api.appstoreconnect.apple.com/v1/reviewSubmissions/{er["id"]}',
-                           headers=headers())
+            print(f'  Cancelling review submission {er["id"]} ({er_state})')
+            r = requests.patch(f'https://api.appstoreconnect.apple.com/v1/reviewSubmissions/{er["id"]}',
+                              headers=headers(), json={
+                'data': {'type': 'reviewSubmissions', 'id': er['id'],
+                         'attributes': {'canceled': True}}
+            })
+            if r.ok:
+                print(f'    Cancelled OK')
+            else:
+                print(f'    Cancel failed: {r.status_code} {r.text[:200]}')
+                # Try DELETE as fallback
+                r2 = requests.delete(f'https://api.appstoreconnect.apple.com/v1/reviewSubmissions/{er["id"]}',
+                                    headers=headers())
+                print(f'    DELETE fallback: {r2.status_code}')
+            cancelled = True
+    if cancelled:
+        print('  Waiting for cancellations to propagate...')
+        time.sleep(10)
 
 # 審査提出
 review = api('POST', '/reviewSubmissions', json={
