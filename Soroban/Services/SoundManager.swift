@@ -171,6 +171,27 @@ class SoundManager {
         }
     }
 
+    func playBeadStackClick(intensity: CGFloat) {
+        guard let player = playerNode else { return }
+
+        let primaryBuffers = clickBuffers.isEmpty ? softClickBuffers : clickBuffers
+        guard !primaryBuffers.isEmpty else { return }
+
+        let primaryIndex = Int.random(in: 0..<primaryBuffers.count)
+        player.scheduleBuffer(primaryBuffers[primaryIndex], at: nil, options: [], completionHandler: nil)
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.018) { [weak self] in
+            guard let self = self else { return }
+            let secondaryBuffers = self.softClickBuffers.isEmpty ? primaryBuffers : self.softClickBuffers
+            guard !secondaryBuffers.isEmpty else { return }
+
+            let secondaryIndex = Int.random(in: 0..<secondaryBuffers.count)
+            player.scheduleBuffer(secondaryBuffers[secondaryIndex], at: nil, options: [], completionHandler: nil)
+        }
+
+        haptic.impactOccurred(intensity: min(max(intensity, 0.35), 1.0))
+    }
+
     func playResetSound() {
         guard let buffer = resetBuffer, let player = playerNode else { return }
         player.scheduleBuffer(buffer, at: nil, options: [], completionHandler: nil)

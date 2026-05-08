@@ -1,5 +1,4 @@
 import SpriteKit
-import CoreMotion
 
 class SorobanScene: SKScene {
 
@@ -11,11 +10,9 @@ class SorobanScene: SKScene {
     // MARK: - State
     weak var sorobanState: SorobanState?
     private var rods: [SorobanRod] = []
-    private var motionManager = CMMotionManager()
     private var soundManager = SoundManager()
     private var draggedBead: BeadNode?
     private var dragStartY: CGFloat = 0
-    private var gravityY: CGFloat = -1.0
 
     // MARK: - Layout constants (calculated in didMove)
     private var frameRect = CGRect.zero
@@ -37,12 +34,10 @@ class SorobanScene: SKScene {
         calculateLayout()
         buildFrame()
         buildRods()
-        startMotionUpdates()
         observeNotifications()
     }
 
     override func willMove(from view: SKView) {
-        motionManager.stopDeviceMotionUpdates()
         NotificationCenter.default.removeObserver(self)
     }
 
@@ -82,12 +77,25 @@ class SorobanScene: SKScene {
     // MARK: - Build Soroban Frame
 
     private func buildFrame() {
-        let frameColor = SKColor(red: 0.35, green: 0.20, blue: 0.10, alpha: 1)
-        let beamColor = SKColor(red: 0.40, green: 0.24, blue: 0.12, alpha: 1)
-        let frameThickness: CGFloat = 10
-        let beamThickness: CGFloat = 8
+        let frameColor = SKColor(red: 0.30, green: 0.16, blue: 0.07, alpha: 1)
+        let beamColor = SKColor(red: 0.38, green: 0.20, blue: 0.09, alpha: 1)
+        let frameThickness: CGFloat = 12
+        let beamThickness: CGFloat = 10
 
-        // Outer frame
+        let tableShadow = SKShapeNode(rect: frameRect.offsetBy(dx: 0, dy: -5), cornerRadius: 10)
+        tableShadow.fillColor = SKColor(red: 0.02, green: 0.015, blue: 0.01, alpha: 0.55)
+        tableShadow.strokeColor = .clear
+        tableShadow.zPosition = -2
+        addChild(tableShadow)
+
+        let woodBg = SKShapeNode(rect: frameRect.insetBy(dx: frameThickness / 2, dy: frameThickness / 2), cornerRadius: 6)
+        woodBg.fillColor = SKColor(red: 0.20, green: 0.105, blue: 0.045, alpha: 1)
+        woodBg.strokeColor = .clear
+        woodBg.zPosition = 0
+        addChild(woodBg)
+
+        addWoodGrain(in: frameRect.insetBy(dx: frameThickness, dy: frameThickness), zPosition: 0.5)
+
         let outerFrame = SKShapeNode(rect: frameRect, cornerRadius: 6)
         outerFrame.strokeColor = frameColor
         outerFrame.lineWidth = frameThickness
@@ -95,14 +103,13 @@ class SorobanScene: SKScene {
         outerFrame.zPosition = 5
         addChild(outerFrame)
 
-        // Inner wood fill
-        let woodBg = SKShapeNode(rect: frameRect.insetBy(dx: frameThickness / 2, dy: frameThickness / 2), cornerRadius: 3)
-        woodBg.fillColor = SKColor(red: 0.25, green: 0.15, blue: 0.08, alpha: 1)
-        woodBg.strokeColor = .clear
-        woodBg.zPosition = 0
-        addChild(woodBg)
+        let innerHighlight = SKShapeNode(rect: frameRect.insetBy(dx: frameThickness * 0.55, dy: frameThickness * 0.55), cornerRadius: 5)
+        innerHighlight.strokeColor = SKColor(red: 0.72, green: 0.48, blue: 0.24, alpha: 0.35)
+        innerHighlight.lineWidth = 1
+        innerHighlight.fillColor = .clear
+        innerHighlight.zPosition = 6
+        addChild(innerHighlight)
 
-        // Beam (reckoning bar)
         let beamRect = CGRect(
             x: frameRect.minX,
             y: beamY - beamThickness / 2,
@@ -116,33 +123,93 @@ class SorobanScene: SKScene {
         beam.zPosition = 10
         addChild(beam)
 
-        // Dot markers on beam (traditional: at rods for units marking)
+        let beamHighlight = SKShapeNode(rect: CGRect(
+            x: beamRect.minX + 4,
+            y: beamRect.maxY - 2,
+            width: beamRect.width - 8,
+            height: 1
+        ))
+        beamHighlight.fillColor = SKColor(red: 0.82, green: 0.55, blue: 0.28, alpha: 0.42)
+        beamHighlight.strokeColor = .clear
+        beamHighlight.zPosition = 11
+        addChild(beamHighlight)
+
         let dotPositions = [3, 6, 9] // 0-indexed, every 3rd for traditional
         for pos in dotPositions {
             if pos < rodCount {
                 let dotX = rodStartX + CGFloat(pos) * rodSpacing
-                let dot = SKShapeNode(circleOfRadius: 3)
+                let dot = SKShapeNode(circleOfRadius: 3.6)
                 dot.position = CGPoint(x: dotX, y: beamY)
-                dot.fillColor = SKColor(red: 0.9, green: 0.85, blue: 0.7, alpha: 1)
-                dot.strokeColor = .clear
-                dot.zPosition = 11
+                dot.fillColor = SKColor(red: 0.92, green: 0.78, blue: 0.42, alpha: 1)
+                dot.strokeColor = SKColor(red: 0.35, green: 0.20, blue: 0.09, alpha: 0.55)
+                dot.lineWidth = 0.8
+                dot.zPosition = 12
                 addChild(dot)
             }
         }
 
-        // Rods (vertical lines)
-        let rodColor = SKColor(red: 0.55, green: 0.50, blue: 0.45, alpha: 1)
+        let rodColor = SKColor(red: 0.68, green: 0.62, blue: 0.53, alpha: 1)
         for i in 0..<rodCount {
             let x = rodStartX + CGFloat(i) * rodSpacing
+            let rodShadow = SKShapeNode()
+            let shadowPath = CGMutablePath()
+            shadowPath.move(to: CGPoint(x: x + 1.4, y: bottomFrameY + 7))
+            shadowPath.addLine(to: CGPoint(x: x + 1.4, y: topFrameY - 7))
+            rodShadow.path = shadowPath
+            rodShadow.strokeColor = SKColor(red: 0.02, green: 0.015, blue: 0.01, alpha: 0.45)
+            rodShadow.lineWidth = 2.6
+            rodShadow.zPosition = 1
+            addChild(rodShadow)
+
             let rod = SKShapeNode()
             let path = CGMutablePath()
-            path.move(to: CGPoint(x: x, y: bottomFrameY + 5))
-            path.addLine(to: CGPoint(x: x, y: topFrameY - 5))
+            path.move(to: CGPoint(x: x, y: bottomFrameY + 7))
+            path.addLine(to: CGPoint(x: x, y: topFrameY - 7))
             rod.path = path
             rod.strokeColor = rodColor
-            rod.lineWidth = 2
+            rod.lineWidth = 2.2
             rod.zPosition = 1
             addChild(rod)
+
+            let rodGlint = SKShapeNode()
+            let glintPath = CGMutablePath()
+            glintPath.move(to: CGPoint(x: x - 0.6, y: bottomFrameY + 10))
+            glintPath.addLine(to: CGPoint(x: x - 0.6, y: topFrameY - 10))
+            rodGlint.path = glintPath
+            rodGlint.strokeColor = SKColor(white: 1.0, alpha: 0.20)
+            rodGlint.lineWidth = 0.7
+            rodGlint.zPosition = 2
+            addChild(rodGlint)
+        }
+    }
+
+    private func addWoodGrain(in rect: CGRect, zPosition: CGFloat) {
+        let grainColors = [
+            SKColor(red: 0.58, green: 0.33, blue: 0.13, alpha: 0.20),
+            SKColor(red: 0.10, green: 0.055, blue: 0.025, alpha: 0.26),
+            SKColor(red: 0.82, green: 0.56, blue: 0.28, alpha: 0.12)
+        ]
+
+        let lineCount = 22
+        for i in 0..<lineCount {
+            let y = rect.minY + rect.height * CGFloat(i + 1) / CGFloat(lineCount + 1)
+            let path = CGMutablePath()
+            path.move(to: CGPoint(x: rect.minX + 8, y: y))
+
+            let control1 = CGPoint(x: rect.midX * 0.72, y: y + CGFloat((i % 5) - 2) * 1.6)
+            let control2 = CGPoint(x: rect.midX * 1.28, y: y + CGFloat((i % 7) - 3) * 1.3)
+            path.addCurve(
+                to: CGPoint(x: rect.maxX - 8, y: y + CGFloat((i % 3) - 1)),
+                control1: control1,
+                control2: control2
+            )
+
+            let grain = SKShapeNode()
+            grain.path = path
+            grain.strokeColor = grainColors[i % grainColors.count]
+            grain.lineWidth = i % 4 == 0 ? 1.1 : 0.7
+            grain.zPosition = zPosition
+            addChild(grain)
         }
     }
 
@@ -230,24 +297,15 @@ class SorobanScene: SKScene {
                 moveHeavenBead(rod: rod, active: false)
             }
         } else {
-            // Move earth beads - move this bead and all above/below it
             let beadIdx = bead.beadIndex
             let targetActive = deltaY > beadHeight * 0.3
             let targetInactive = deltaY < -beadHeight * 0.3
-            if targetActive {
-                // Activate this bead and all between it and beam (index 0 = closest to beam)
-                for j in stride(from: beadIdx, through: 0, by: -1) {
-                    if !rod.earthActive[j] {
-                        moveEarthBead(rod: rod, index: j, active: true)
-                    }
-                }
-            } else if targetInactive {
-                // Deactivate this bead and all below it (away from beam)
-                for j in beadIdx..<earthBeadsPerRod {
-                    if rod.earthActive[j] {
-                        moveEarthBead(rod: rod, index: j, active: false)
-                    }
-                }
+            if targetActive && !rod.earthActive[beadIdx] {
+                moveEarthBead(rod: rod, index: beadIdx, active: true)
+                dragStartY = location.y
+            } else if targetInactive && rod.earthActive[beadIdx] {
+                moveEarthBead(rod: rod, index: beadIdx, active: false)
+                dragStartY = location.y
             }
         }
     }
@@ -271,21 +329,7 @@ class SorobanScene: SKScene {
                     moveHeavenBead(rod: rod, active: !rod.heavenActive[0])
                 } else {
                     let beadIdx = bead.beadIndex
-                    if rod.earthActive[beadIdx] {
-                        // Deactivate this and all away from beam
-                        for j in beadIdx..<earthBeadsPerRod {
-                            if rod.earthActive[j] {
-                                moveEarthBead(rod: rod, index: j, active: false)
-                            }
-                        }
-                    } else {
-                        // Activate this and all toward beam (index 0 = closest)
-                        for j in stride(from: beadIdx, through: 0, by: -1) {
-                            if !rod.earthActive[j] {
-                                moveEarthBead(rod: rod, index: j, active: true)
-                            }
-                        }
-                    }
+                    moveEarthBead(rod: rod, index: beadIdx, active: !rod.earthActive[beadIdx])
                 }
             }
         }
@@ -302,7 +346,7 @@ class SorobanScene: SKScene {
         let move = SKAction.move(to: target, duration: 0.08)
         move.timingMode = .easeOut
         bead.run(move)
-        soundManager.playBeadClick(velocity: 0.7)
+        soundManager.playBeadStackClick(intensity: 0.75)
         updateValue()
     }
 
@@ -314,7 +358,7 @@ class SorobanScene: SKScene {
         let move = SKAction.move(to: target, duration: 0.06)
         move.timingMode = .easeOut
         bead.run(move)
-        soundManager.playBeadClick(velocity: 0.5)
+        soundManager.playBeadStackClick(intensity: 0.55)
         updateValue()
     }
 
@@ -344,56 +388,6 @@ class SorobanScene: SKScene {
         formatter.numberStyle = .decimal
         formatter.groupingSeparator = ","
         return formatter.string(from: NSNumber(value: value)) ?? "0"
-    }
-
-    // MARK: - Motion (Gyroscope Gravity)
-
-    private func startMotionUpdates() {
-        guard motionManager.isDeviceMotionAvailable else { return }
-        motionManager.deviceMotionUpdateInterval = 1.0 / 30.0
-        motionManager.startDeviceMotionUpdates(to: .main) { [weak self] motion, _ in
-            guard let self = self, let motion = motion else { return }
-            // In landscape, gravity.x maps to the "vertical" axis of the soroban
-            // gravity.y maps to horizontal tilt
-            let gy = motion.gravity.y
-            // For landscape orientation, gy maps to vertical effect on beads
-            self.gravityY = -gy
-            self.applyGravity()
-        }
-    }
-
-    private func applyGravity() {
-        // When device is tilted significantly, unset beads may slide
-        // Threshold for "strong tilt" that would move beads
-        let threshold = 0.6
-
-        if abs(gravityY) > threshold {
-            let tiltDown = gravityY < -threshold // beads should fall down (away from beam for heaven, toward frame for earth)
-
-            for rod in rods {
-                if tiltDown {
-                    // Strong downward tilt - heaven beads deactivate, earth beads deactivate
-                    if rod.heavenActive[0] {
-                        moveHeavenBead(rod: rod, active: false)
-                    }
-                    for j in 0..<earthBeadsPerRod {
-                        if rod.earthActive[j] {
-                            moveEarthBead(rod: rod, index: j, active: false)
-                        }
-                    }
-                } else {
-                    // Strong upward tilt - heaven beads activate, earth beads activate
-                    if !rod.heavenActive[0] {
-                        moveHeavenBead(rod: rod, active: true)
-                    }
-                    for j in 0..<earthBeadsPerRod {
-                        if !rod.earthActive[j] {
-                            moveEarthBead(rod: rod, index: j, active: true)
-                        }
-                    }
-                }
-            }
-        }
     }
 
     // MARK: - Reset
