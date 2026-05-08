@@ -236,6 +236,17 @@ api('PATCH', f'/appStoreVersions/{version_id}', json={
              'relationships': {'build': {'data': {'type': 'builds', 'id': build_id}}}}
 })
 
+# 既存の審査提出をキャンセル
+existing_reviews = requests.get(f'https://api.appstoreconnect.apple.com/v1/apps/{APP_ID}/reviewSubmissions',
+                                headers=headers())
+if existing_reviews.ok:
+    for er in existing_reviews.json().get('data', []):
+        er_state = er['attributes'].get('state', '')
+        if er_state in ('WAITING_FOR_REVIEW', 'IN_REVIEW', 'READY_FOR_REVIEW'):
+            print(f'  Cancelling existing review submission {er["id"]} ({er_state})')
+            requests.delete(f'https://api.appstoreconnect.apple.com/v1/reviewSubmissions/{er["id"]}',
+                           headers=headers())
+
 # 審査提出
 review = api('POST', '/reviewSubmissions', json={
     'data': {'type': 'reviewSubmissions', 'attributes': {'platform': 'IOS'},
