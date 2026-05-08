@@ -23,12 +23,22 @@ jobs:
         fi
         xcodebuild -version
 
+    - name: Install XcodeGen
+      run: brew install xcodegen
+
     - name: Set build number
       run: |
         BUILD_NUM=${{ github.run_number }}
         echo "BUILD_NUM=$BUILD_NUM" >> $GITHUB_ENV
-        cd Soroban.xcodeproj
-        sed -i "" "s/CURRENT_PROJECT_VERSION = [0-9]*/CURRENT_PROJECT_VERSION = $BUILD_NUM/g" project.pbxproj
+        sed -i "" "s/CURRENT_PROJECT_VERSION: \"[0-9]*/CURRENT_PROJECT_VERSION: \"$BUILD_NUM/" project.yml
+
+    - name: Generate Xcode project
+      run: xcodegen generate
+
+    - name: Patch Info.plist build number
+      run: |
+        /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUM" Soroban/Info.plist
+        echo "CFBundleVersion: $(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' Soroban/Info.plist)"
 
     - name: Resolve packages
       run: |
