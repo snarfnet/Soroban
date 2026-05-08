@@ -196,7 +196,30 @@ for loc in locs.get('data', []):
             })
             print(f'      Uploaded: {fname}')
 
-print('Screenshots uploaded!')
+print('Screenshots uploaded! Waiting for processing...')
+for _ in range(20):
+    time.sleep(10)
+    all_done = True
+    locs_check = api('GET', f'/appStoreVersions/{version_id}/appStoreVersionLocalizations')
+    for loc_c in locs_check.get('data', []):
+        sets_check = api('GET', f'/appStoreVersionLocalizations/{loc_c["id"]}/appScreenshotSets')
+        for sc_set in sets_check.get('data', []):
+            screenshots = api('GET', f'/appScreenshotSets/{sc_set["id"]}/appScreenshots')
+            for sc in screenshots.get('data', []):
+                state = sc['attributes'].get('assetDeliveryState', {}).get('state', '')
+                if state != 'COMPLETE':
+                    all_done = False
+                    break
+            if not all_done:
+                break
+        if not all_done:
+            break
+    if all_done:
+        print('All screenshots processed!')
+        break
+    print('  Still processing...')
+else:
+    print('Warning: screenshot processing timed out, attempting submit anyway')
 
 # ビルドをバージョンに紐付け
 api('PATCH', f'/appStoreVersions/{version_id}', json={
