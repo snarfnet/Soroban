@@ -211,8 +211,9 @@ for _ in range(40):
                 errors = delivery.get('errors', [])
                 if errors:
                     print(f'    Screenshot {sc["id"]} ERROR: {errors}')
+                    print('Screenshot processing failed, aborting')
+                    sys.exit(1)
                 if state != 'COMPLETE':
-                    print(f'    Screenshot {sc["id"]}: {state}')
                     all_done = False
                     break
             if not all_done:
