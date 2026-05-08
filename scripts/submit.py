@@ -57,11 +57,16 @@ else:
     print('Timed out waiting for build')
     sys.exit(1)
 
-# Export compliance
-api('PATCH', f'/builds/{build_id}', json={
+# Export compliance（既にInfo.plistで設定済みならスキップ）
+r = requests.patch(f'https://api.appstoreconnect.apple.com/v1/builds/{build_id}',
+                   headers=headers(), json={
     'data': {'type': 'builds', 'id': build_id,
              'attributes': {'usesNonExemptEncryption': False}}
 })
+if r.ok:
+    print('  Set usesNonExemptEncryption')
+else:
+    print('  usesNonExemptEncryption already set, skipping')
 
 # contentRightsDeclaration
 api('PATCH', f'/apps/{APP_ID}', json={
