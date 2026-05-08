@@ -206,8 +206,13 @@ for _ in range(40):
         for sc_set in sets_check.get('data', []):
             screenshots = api('GET', f'/appScreenshotSets/{sc_set["id"]}/appScreenshots')
             for sc in screenshots.get('data', []):
-                state = sc['attributes'].get('assetDeliveryState', {}).get('state', '')
+                delivery = sc['attributes'].get('assetDeliveryState', {})
+                state = delivery.get('state', '')
+                errors = delivery.get('errors', [])
+                if errors:
+                    print(f'    Screenshot {sc["id"]} ERROR: {errors}')
                 if state != 'COMPLETE':
+                    print(f'    Screenshot {sc["id"]}: {state}')
                     all_done = False
                     break
             if not all_done:
