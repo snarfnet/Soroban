@@ -141,7 +141,10 @@ for loc in locs.get('data', []):
     print(f'  Locale: {locale}')
 
     for display_type, prefix in SCREENSHOT_TYPES.items():
-        screenshot_files = sorted(glob.glob(os.path.join(SCREENSHOT_DIR, f'{prefix}*.png')))
+        all_files = sorted(glob.glob(os.path.join(SCREENSHOT_DIR, f'{prefix}*.png')))
+        # Exclude files with other prefixes when prefix is empty
+        other_prefixes = [p for p in SCREENSHOT_TYPES.values() if p and p != prefix]
+        screenshot_files = [f for f in all_files if not any(os.path.basename(f).startswith(op) for op in other_prefixes)]
         if not screenshot_files:
             continue
         print(f'    {display_type} ({len(screenshot_files)} files)')
