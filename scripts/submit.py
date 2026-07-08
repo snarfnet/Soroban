@@ -10,8 +10,8 @@ SCREENSHOT_TYPES = {
     'APP_IPHONE_67': '',
     'APP_IPHONE_65': '65_',
 }
-VERSION_STRING = '1.3.1'
-WHATS_NEW = '玉に影・光沢・穴の陰影を追加。木枠に木目とハイライト、芯棒の影と光を追加。玉の衝突音をリアルな「カチッ」に改善。'
+VERSION_STRING = '1.3.2'
+WHATS_NEW = '軽微な改善を行いました。'
 
 REVIEW_CONTACT = {
     'contactFirstName': '聖',
