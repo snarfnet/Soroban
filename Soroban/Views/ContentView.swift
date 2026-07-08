@@ -60,8 +60,8 @@ struct ContentView: View {
 
             Spacer()
 
-            // AdMob Banner
-            BannerAdView(adUnitID: AdConfig.bannerAdUnitID)
+            // Amazonアソシエイト バナー
+            BannerAdView()
                 .frame(width: 320, height: 50)
 
             Spacer()
